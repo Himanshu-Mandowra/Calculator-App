@@ -1,6 +1,13 @@
-import { StyleSheet, Text, TouchableOpacity, GestureResponderEvent } from "react-native";
+import React from "react";
+import {
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  GestureResponderEvent,
+  Platform,
+} from "react-native";
+import * as Haptics from "expo-haptics"; // ← Import Expo Haptics
 import { Colors } from "../utils/Colors";
-// ...existing code...
 
 type Props = {
   title: string;
@@ -9,44 +16,45 @@ type Props = {
 };
 
 const Button: React.FC<Props> = ({ title, type, onPress }) => {
+  const handlePress = async (event?: GestureResponderEvent) => {
+    if (Platform.OS !== "web") {
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); // ✅ smooth vibration
+    }
+    onPress(event);
+  };
+
+  const bgColor =
+    type === "top"
+      ? Colors.btnDark
+      : type === "right"
+      ? Colors.btnRight
+      : Colors.transparent;
+
   return (
-    <TouchableOpacity
-      style={[
-        styles.button,
-        {
-          backgroundColor:
-            type == "top"
-              ? Colors.btnDark
-              : type == "right"
-              ? Colors.btnRight
-              : Colors.btnLight,
-        },
-      ]}
-      onPress={onPress}
-    >
-      <Text
-        style={{
-          fontSize: 24,
-          color: type == "number" ? Colors.black : Colors.white,
-        }}
-      >
-        {title}
-      </Text>
+    <TouchableOpacity style={[styles.button, { backgroundColor: bgColor }]} onPress={handlePress}>
+      <Text style={styles.text}>{title}</Text>
     </TouchableOpacity>
   );
 };
 
 export default Button;
 
-// ...existing code...
 const styles = StyleSheet.create({
   button: {
     height: 60,
     width: 60,
-    borderRadius: 10,
-    padding: 10,
+    borderRadius: 30,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: Colors.btnDark,
+    elevation: 4,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+  },
+  text: {
+    fontSize: 24,
+    color: Colors.white,
+    fontWeight: "500",
   },
 });
